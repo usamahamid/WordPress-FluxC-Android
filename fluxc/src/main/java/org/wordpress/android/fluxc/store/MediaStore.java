@@ -517,6 +517,7 @@ public class MediaStore extends Store {
         }
 
         if (payload.site.isUsingWpComRestApi()) {
+            AppLog.d(AppLog.T.MEDIA, "about to start media upload, object: " + payload.media);
             mMediaRestClient.uploadMedia(payload.site, payload.media);
         } else {
             mMediaXmlrpcClient.uploadMedia(payload.site, payload.media);

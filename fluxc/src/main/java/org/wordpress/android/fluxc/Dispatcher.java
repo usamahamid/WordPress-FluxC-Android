@@ -32,7 +32,7 @@ public class Dispatcher {
     }
 
     public void dispatch(org.wordpress.android.fluxc.annotations.action.Action action) {
-        AppLog.d(T.API, "Dispatching action: " + action.getType().getClass().getSimpleName()
+        AppLog.d(T.API, "Dispatching action: " + action + action.getType().getClass().getSimpleName()
                 + "-" + action.getType().name());
         post(action);
     }

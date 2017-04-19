@@ -4,6 +4,7 @@ import android.text.TextUtils;
 
 import org.wordpress.android.fluxc.model.MediaModel;
 import org.wordpress.android.fluxc.utils.MediaUtils;
+import org.wordpress.android.util.AppLog;
 
 import java.io.File;
 import java.io.IOException;
@@ -108,6 +109,7 @@ public abstract class BaseUploadRequestBody extends RequestBody {
             if ((currentTimeMillis - mLastTimeOnProgressCalled) > ON_PROGRESS_THROTTLE_RATE
                 || mLastTimeOnProgressCalled == 0) {
                 mLastTimeOnProgressCalled = currentTimeMillis;
+                AppLog.d(AppLog.T.MEDIA, "inner progress, media object: " + mMedia + " progress: " + getProgress(mBytesWritten));
                 mListener.onProgress(mMedia, getProgress(mBytesWritten));
             }
         }
