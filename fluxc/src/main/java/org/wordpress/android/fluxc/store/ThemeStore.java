@@ -21,6 +21,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+@SuppressWarnings("WeakerAccess")
 @Singleton
 public class ThemeStore extends Store {
     // Payloads
@@ -194,6 +195,11 @@ public class ThemeStore extends Store {
         mThemeRestClient = themeRestClient;
     }
 
+    @Override
+    public void onRegister() {
+        AppLog.d(AppLog.T.API, "ThemeStore onRegister");
+    }
+
     @Subscribe(threadMode = ThreadMode.ASYNC)
     @Override
     public void onAction(Action action) {
@@ -256,11 +262,6 @@ public class ThemeStore extends Store {
                 removeSiteThemes((SiteModel) action.getPayload());
                 break;
         }
-    }
-
-    @Override
-    public void onRegister() {
-        AppLog.d(AppLog.T.API, "ThemeStore onRegister");
     }
 
     public List<ThemeModel> getWpComThemes() {
