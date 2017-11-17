@@ -101,16 +101,18 @@ public class ThemeSqlUtils {
      */
     public static Cursor getThemesForSiteAsCursor(@NonNull SiteModel site) {
         return WellSql.select(ThemeModel.class)
-                .where()
+                .where().beginGroup()
                 .equals(ThemeModelTable.LOCAL_SITE_ID, site.getId())
-                .endWhere().getAsCursor();
+                .equals(ThemeModelTable.IS_WP_COM_THEME, false)
+                .endGroup().endWhere().getAsCursor();
     }
 
     public static List<ThemeModel> getThemesForSite(@NonNull SiteModel site) {
         return WellSql.select(ThemeModel.class)
-                .where()
+                .where().beginGroup()
                 .equals(ThemeModelTable.LOCAL_SITE_ID, site.getId())
-                .endWhere().getAsModel();
+                .equals(ThemeModelTable.IS_WP_COM_THEME, false)
+                .endGroup().endWhere().getAsModel();
     }
 
     /**
