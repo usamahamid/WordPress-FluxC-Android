@@ -264,29 +264,19 @@ public class ThemeStore extends Store {
         }
     }
 
+    /** @return all themes with the {@link com.wellsql.generated.ThemeModelTable#IS_WP_COM_THEME} flag set */
     public List<ThemeModel> getWpComThemes() {
         return ThemeSqlUtils.getWpComThemes();
     }
 
+    /** @return all themes with the {@link com.wellsql.generated.ThemeModelTable#IS_WP_COM_THEME} flag set */
     public Cursor getWpComThemesCursor() {
         return ThemeSqlUtils.getWpComThemesCursor();
     }
 
-    public Cursor getThemesCursorForSite(@NonNull SiteModel site) {
-        return ThemeSqlUtils.getThemesForSiteAsCursor(site);
-    }
-
-    public List<ThemeModel> getThemesForSite(@NonNull SiteModel site) {
-        return ThemeSqlUtils.getThemesForSite(site);
-    }
-
-    public ThemeModel getInstalledThemeByThemeId(String themeId) {
-        if (themeId == null || themeId.isEmpty()) {
-            return null;
-        }
-        return ThemeSqlUtils.getThemeByThemeId(themeId, false);
-    }
-
+    /**
+     * @return the WordPress.com theme who's theme ID matches the given theme ID, null if not found or empty parameter
+     */
     public ThemeModel getWpComThemeByThemeId(String themeId) {
         if (themeId == null || themeId.isEmpty()) {
             return null;
@@ -294,11 +284,45 @@ public class ThemeStore extends Store {
         return ThemeSqlUtils.getThemeByThemeId(themeId, true);
     }
 
+    /**
+     * Make sure the site passed in has the correct ID. You can guarantee this by following best practices and passing
+     * a site retrieved directly from the store.
+     *
+     * @return all themes stored with a local site ID matching given site's ID (via {@link SiteModel#getSiteId()})
+     */
+    public List<ThemeModel> getThemesForSite(@NonNull SiteModel site) {
+        return ThemeSqlUtils.getThemesForSite(site);
+    }
+
+    /**
+     * Make sure the site passed in has the correct ID. You can guarantee this by following best practices and passing
+     * a site retrieved directly from the store.
+     *
+     * @return all themes stored with a local site ID matching given site's ID (via {@link SiteModel#getSiteId()})
+     */
+    @SuppressWarnings("unused")
+    public Cursor getThemesCursorForSite(@NonNull SiteModel site) {
+        return ThemeSqlUtils.getThemesForSiteAsCursor(site);
+    }
+
+    /** @return the installed theme who's theme ID matches the given theme ID, null if not found or empty parameter */
+    public ThemeModel getInstalledThemeByThemeId(String themeId) {
+        if (themeId == null || themeId.isEmpty()) {
+            return null;
+        }
+        return ThemeSqlUtils.getThemeByThemeId(themeId, false);
+    }
+
+    /** @return the theme who's active flag is set and local site ID matches the given site ID, null if none found */
     public ThemeModel getActiveThemeForSite(@NonNull SiteModel site) {
         List<ThemeModel> activeTheme = ThemeSqlUtils.getActiveThemeForSite(site);
         return activeTheme.isEmpty() ? null : activeTheme.get(0);
     }
 
+    /**
+     * Sets the active flag and associates the given theme with the given site. Any existing active themes for the
+     * given site are un-flagged.a
+     */
     public void setActiveThemeForSite(@NonNull SiteModel site, @NonNull ThemeModel theme) {
         ThemeSqlUtils.insertOrReplaceActiveThemeForSite(site, theme);
     }
