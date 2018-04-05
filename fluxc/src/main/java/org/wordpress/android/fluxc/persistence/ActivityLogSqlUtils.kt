@@ -34,7 +34,7 @@ class ActivityLogSqlUtils
                     .where()
                     .equals(ActivityLogTable.ACTIVITY_ID, it.activityID)
                     .endWhere()
-                    .put(it)
+                    .put(it, UpdateAllExceptId<ActivityLogBuilder>(ActivityLogBuilder::class.java))
         }
         insertQuery.execute()
         return updateQueries.map { it.execute() }.sum() + new.count()
