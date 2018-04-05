@@ -33,6 +33,7 @@ class ActivityLogSqlUtils
             WellSql.update(ActivityLogBuilder::class.java)
                     .where()
                     .equals(ActivityLogTable.ACTIVITY_ID, it.activityID)
+                    .equals(ActivityLogTable.LOCAL_SITE_ID, it.localSiteId)
                     .endWhere()
                     .put(it, UpdateAllExceptId<ActivityLogBuilder>(ActivityLogBuilder::class.java))
         }
