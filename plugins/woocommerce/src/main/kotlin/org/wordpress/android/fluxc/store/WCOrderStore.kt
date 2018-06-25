@@ -104,7 +104,8 @@ class WCOrderStore @Inject constructor(dispatcher: Dispatcher, private val wcOrd
         var rowsAffected: Int,
         var canLoadMore: Boolean = false,
         var didLoadMore: Boolean = false,
-        var orders: List<WCOrderModel>? = null) : OnChanged<OrderError>() {
+        var orders: List<WCOrderModel>? = null
+    ) : OnChanged<OrderError>() {
         var causeOfChange: WCOrderAction? = null
     }
 
