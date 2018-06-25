@@ -100,7 +100,10 @@ class WCOrderStore @Inject constructor(dispatcher: Dispatcher, private val wcOrd
     }
 
     // OnChanged events
-    class OnOrderChanged(var rowsAffected: Int, var canLoadMore: Boolean = false) : OnChanged<OrderError>() {
+    class OnOrderChanged(
+        var rowsAffected: Int,
+        var canLoadMore: Boolean = false,
+        var orders: List<WCOrderModel>? = null) : OnChanged<OrderError>() {
         var causeOfChange: WCOrderAction? = null
     }
 
@@ -182,7 +185,7 @@ class WCOrderStore @Inject constructor(dispatcher: Dispatcher, private val wcOrd
 
             val rowsAffected = payload.orders.sumBy { OrderSqlUtils.insertOrUpdateOrder(it) }
 
-            onOrderChanged = OnOrderChanged(rowsAffected, payload.canLoadMore)
+            onOrderChanged = OnOrderChanged(rowsAffected, payload.canLoadMore, payload.orders)
         }
 
         onOrderChanged.causeOfChange = WCOrderAction.FETCH_ORDERS
