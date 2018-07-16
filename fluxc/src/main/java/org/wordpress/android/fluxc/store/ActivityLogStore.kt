@@ -1,6 +1,9 @@
 package org.wordpress.android.fluxc.store
 
 import com.yarolegovich.wellsql.SelectQuery
+import kotlinx.coroutines.experimental.DefaultDispatcher
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.withContext
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import org.wordpress.android.fluxc.Dispatcher
@@ -47,6 +50,11 @@ class ActivityLogStore
         return activityLogSqlUtils.getActivitiesForSite(site, order)
     }
 
+    fun getActivitiesFromDatabaseAsync(site: SiteModel, ascending: Boolean = true) = async {
+        val order = if (ascending) SelectQuery.ORDER_ASCENDING else SelectQuery.ORDER_DESCENDING
+        return@async activityLogSqlUtils.getActivitiesForSite(site, order)
+    }
+
     fun getActivityLogItemByRewindId(rewindId: String): ActivityLogModel? {
         return activityLogSqlUtils.getActivityByRewindId(rewindId)
     }
@@ -74,6 +82,22 @@ class ActivityLogStore
         activityLogRestClient.fetchActivity(fetchActivityLogPayload.site, ACTIVITY_LOG_PAGE_SIZE, offset)
     }
 
+    suspend fun getActivitiesAsync(fetchActivityLogPayload: FetchActivityLogPayload): List<ActivityLogModel> {
+        var offset = 0
+        if (fetchActivityLogPayload.loadMore) {
+            offset = activityLogSqlUtils.getActivitiesForSite(
+                    fetchActivityLogPayload.site,
+                    SelectQuery.ORDER_ASCENDING
+            ).size
+        }
+        val result = activityLogRestClient.fetchActivityAsync(fetchActivityLogPayload.site,
+                ACTIVITY_LOG_PAGE_SIZE, offset)
+        (result.type as? ActivityLogAction)?.let {
+            storeActivityLogAsync(result.payload, it)
+        }
+        return getActivitiesFromDatabaseAsync(fetchActivityLogPayload.site).await()
+    }
+
     private fun rewind(rewindPayload: RewindPayload) {
         activityLogRestClient.rewind(rewindPayload.site, rewindPayload.rewindId)
     }
@@ -91,6 +115,27 @@ class ActivityLogStore
             val canLoadMore = payload.activityLogModels.isNotEmpty() &&
                     (payload.offset + payload.number) < payload.totalItems
             emitChange(OnActivityLogFetched(rowsAffected, canLoadMore, action))
+        }
+    }
+
+    private suspend fun storeActivityLogAsync(
+        payload: FetchedActivityLogPayload,
+        action: ActivityLogAction)
+            : OnActivityLogFetched {
+        return if (payload.error != null) {
+            OnActivityLogFetched(payload.error, action)
+        } else {
+            if (payload.offset == 0) {
+                withContext(DefaultDispatcher) { activityLogSqlUtils.deleteActivityLog() }
+            }
+            val rowsAffected =
+                if (payload.activityLogModels.isNotEmpty())
+                    withContext(DefaultDispatcher) {activityLogSqlUtils.insertOrUpdateActivities(payload.site,
+                        payload.activityLogModels) }
+                else 0
+            val canLoadMore = payload.activityLogModels.isNotEmpty() &&
+                    (payload.offset + payload.number) < payload.totalItems
+            OnActivityLogFetched(rowsAffected, canLoadMore, action)
         }
     }
 
