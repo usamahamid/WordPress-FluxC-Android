@@ -82,7 +82,7 @@ class ActivityLogStore
         activityLogRestClient.fetchActivity(fetchActivityLogPayload.site, ACTIVITY_LOG_PAGE_SIZE, offset)
     }
 
-    suspend fun getActivitiesAsync(fetchActivityLogPayload: FetchActivityLogPayload): List<ActivityLogModel> {
+    suspend fun fetchActivitiesAsync(fetchActivityLogPayload: FetchActivityLogPayload): OnActivityLogFetched {
         var offset = 0
         if (fetchActivityLogPayload.loadMore) {
             offset = activityLogSqlUtils.getActivitiesForSite(
@@ -92,10 +92,8 @@ class ActivityLogStore
         }
         val result = activityLogRestClient.fetchActivityAsync(fetchActivityLogPayload.site,
                 ACTIVITY_LOG_PAGE_SIZE, offset)
-        (result.type as? ActivityLogAction)?.let {
-            storeActivityLogAsync(result.payload, it)
-        }
-        return getActivitiesFromDatabaseAsync(fetchActivityLogPayload.site).await()
+
+        return storeActivityLogAsync(result.payload, result.type as ActivityLogAction)
     }
 
     private fun rewind(rewindPayload: RewindPayload) {
