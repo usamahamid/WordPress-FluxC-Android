@@ -418,11 +418,12 @@ public class SiteRestClient extends BaseWPComRestClient {
                         new WPComErrorListener() {
                             @Override
                             public void onErrorResponse(@NonNull WPComGsonNetworkError error) {
-                                // Domain availability API should always return a response for a valid, authenticated user.
-                                // Therefore, only GENERIC_ERROR is identified here.
-                                DomainAvailabilityError domainAvailabilityError =
-                                        new DomainAvailabilityError(DomainAvailabilityErrorType.GENERIC_ERROR, error.message);
-                                DomainAvailabilityPayload payload = new DomainAvailabilityPayload(domainAvailabilityError);
+                                // Domain availability API should always return a response for a valid,
+                                // authenticated user. Therefore, only GENERIC_ERROR is identified here.
+                                DomainAvailabilityError domainAvailabilityError = new DomainAvailabilityError(
+                                        DomainAvailabilityErrorType.GENERIC_ERROR, error.message);
+                                DomainAvailabilityPayload payload =
+                                        new DomainAvailabilityPayload(domainAvailabilityError);
                                 mDispatcher.dispatch(SiteActionBuilder.newCheckedDomainAvailabilityAction(payload));
                             }
                         });
