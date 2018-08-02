@@ -7,6 +7,7 @@ import org.wordpress.android.fluxc.example.BuildConfig;
 import org.wordpress.android.fluxc.generated.AccountActionBuilder;
 import org.wordpress.android.fluxc.generated.AuthenticationActionBuilder;
 import org.wordpress.android.fluxc.generated.SiteActionBuilder;
+import org.wordpress.android.fluxc.model.DomainAvailabilityModelKt;
 import org.wordpress.android.fluxc.model.PostFormatModel;
 import org.wordpress.android.fluxc.model.RoleModel;
 import org.wordpress.android.fluxc.model.SiteModel;
@@ -71,7 +72,7 @@ public class ReleaseStack_SiteTestWPCom extends ReleaseStack_Base {
         INELIGIBLE_FOR_AUTOMATED_TRANSFER,
         INITIATE_INELIGIBLE_AUTOMATED_TRANSFER,
         AUTOMATED_TRANSFER_NOT_FOUND,
-        CHECK_DOMAIN_AVAILABILITY
+        CHECK_BLACKLISTED_DOMAIN_AVAILABILITY
     }
 
     private TestEvents mNextEvent;
@@ -306,7 +307,7 @@ public class ReleaseStack_SiteTestWPCom extends ReleaseStack_Base {
 
         // Check availability for 'Wordpress.com'.
         mDispatcher.dispatch(SiteActionBuilder.newCheckDomainAvailabilityAction("Wordpress.com"));
-        mNextEvent = TestEvents.CHECK_DOMAIN_AVAILABILITY;
+        mNextEvent = TestEvents.CHECK_BLACKLISTED_DOMAIN_AVAILABILITY;
         mCountDownLatch = new CountDownLatch(1);
         assertTrue(mCountDownLatch.await(TestUtils.DEFAULT_TIMEOUT_MS, TimeUnit.MILLISECONDS));
     }
@@ -484,8 +485,10 @@ public class ReleaseStack_SiteTestWPCom extends ReleaseStack_Base {
         if (event.isError()) {
             throw new AssertionError("Unexpected error occurred with type: " + event.error.type);
         }
-        assertEquals(TestEvents.CHECK_DOMAIN_AVAILABILITY, mNextEvent);
+        assertEquals(TestEvents.CHECK_BLACKLISTED_DOMAIN_AVAILABILITY, mNextEvent);
         assertNotNull(event.model);
+        assertEquals(event.model.getStatus(), DomainAvailabilityModelKt.BLACKLISTED_DOMAIN);
+        assertEquals(event.model.getMappable(), DomainAvailabilityModelKt.BLACKLISTED_DOMAIN);
         mCountDownLatch.countDown();
     }
 
