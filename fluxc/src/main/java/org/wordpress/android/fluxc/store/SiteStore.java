@@ -1072,7 +1072,7 @@ public class SiteStore extends Store {
                 handleFetchedPlans((FetchedPlansPayload) action.getPayload());
                 break;
             case CHECK_DOMAIN_AVAILABILITY:
-                checkDomainAvailabilty((String) action.getPayload());
+                checkDomainAvailability((String) action.getPayload());
                 break;
             case CHECKED_DOMAIN_AVAILABILITY:
                 handleCheckedDomainAvialability((DomainAvailabilityPayload) action.getPayload());
@@ -1371,7 +1371,7 @@ public class SiteStore extends Store {
     }
 
 
-    private void checkDomainAvailabilty(String domainName) {
+    private void checkDomainAvailability(String domainName) {
         if (domainName == null || domainName.isEmpty()) {
             DomainAvailabilityError error =
                     new DomainAvailabilityError(DomainAvailabilityErrorType.INVALID_DOMAIN_NAME);
