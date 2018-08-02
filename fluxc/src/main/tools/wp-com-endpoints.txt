@@ -27,7 +27,7 @@
 /read/site/$site#String/post_email_subscriptions/update
 
 /domains/suggestions
-/domains/$domainName/is-available
+/domains/$domainName#String/is-available
 
 /meta/external-media/pexels
 /sites/$site/external-media-upload
@@ -54,6 +54,8 @@
 /sites/$site/media/$media_ID/
 /sites/$site/media/$media_ID/delete/
 /sites/$site/media/new/
+
+/sites/$site/plans/
 
 /sites/$site/plugins
 /sites/$site/plugins/$name#String

@@ -391,6 +391,23 @@ public class SiteRestClient extends BaseWPComRestClient {
         add(request);
     }
 
+    public void checkDomainAvailability(@NonNull final String domainName) {
+        String url = WPCOMREST.domains.domainName(domainName).is_available.getUrlV1_3();
+        final WPComGsonRequest<DomainAvailabilityResponse> request =
+                WPComGsonRequest.buildGetRequest(url, null, DomainAvailabilityResponse.class,
+                        new Listener<DomainAvailabilityResponse>() {
+                            @Override
+                            public void onResponse(DomainAvailabilityResponse response) {
+                            }
+                        },
+                        new WPComErrorListener() {
+                            @Override
+                            public void onErrorResponse(@NonNull WPComGsonNetworkError error) {
+                            }
+                        });
+        add(request);
+    }
+
     //
     // Unauthenticated network calls
     //
