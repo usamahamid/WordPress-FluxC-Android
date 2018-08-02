@@ -16,6 +16,7 @@ import org.wordpress.android.fluxc.Payload;
 import org.wordpress.android.fluxc.action.SiteAction;
 import org.wordpress.android.fluxc.annotations.action.Action;
 import org.wordpress.android.fluxc.annotations.action.IAction;
+import org.wordpress.android.fluxc.model.DomainAvailabilityModel;
 import org.wordpress.android.fluxc.model.PlanModel;
 import org.wordpress.android.fluxc.model.PostFormatModel;
 import org.wordpress.android.fluxc.model.RoleModel;
@@ -118,6 +119,18 @@ public class SiteStore extends Store {
             this.includeWordpressCom = includeWordpressCom;
             this.includeDotBlogSubdomain = includeDotBlogSubdomain;
             this.quantity = quantity;
+        }
+    }
+
+    public static class DomainAvailabilityPayload extends Payload<DomainAvailabilityError> {
+        @Nullable public DomainAvailabilityModel domainAvailabilityModel;
+
+        public DomainAvailabilityPayload(@NonNull DomainAvailabilityModel domainAvailabilityModel) {
+            this.domainAvailabilityModel = domainAvailabilityModel;
+        }
+
+        public DomainAvailabilityPayload(@NonNull DomainAvailabilityError error) {
+            this.error = error;
         }
     }
 
@@ -371,6 +384,21 @@ public class SiteStore extends Store {
         }
     }
 
+    public static class OnDomainAvailabilityChecked extends OnChanged<DomainAvailabilityError> {
+        public @Nullable DomainAvailabilityModel model;
+
+        public OnDomainAvailabilityChecked(@Nullable DomainAvailabilityModel model,
+                                           @Nullable DomainAvailabilityError error) {
+            this.model = model;
+            this.error = error;
+        }
+
+        public OnDomainAvailabilityChecked(@NonNull DomainAvailabilityError error) {
+            this.model = model;
+            this.error = error;
+        }
+    }
+
     public static class OnURLChecked extends OnChanged<SiteError> {
         public String url;
         public boolean isWPCom;
@@ -423,6 +451,20 @@ public class SiteStore extends Store {
         }
 
         public PlansError(@NonNull PlansErrorType type) {
+            this.type = type;
+        }
+    }
+
+    public static class DomainAvailabilityError implements OnChangedError {
+        @NonNull public DomainAvailabilityErrorType type;
+        @Nullable public String message;
+
+        public DomainAvailabilityError(@NonNull DomainAvailabilityErrorType type, @Nullable String message) {
+            this.type = type;
+            this.message = message;
+        }
+
+        public DomainAvailabilityError(@NonNull DomainAvailabilityErrorType type) {
             this.type = type;
         }
     }
@@ -528,6 +570,11 @@ public class SiteStore extends Store {
             }
             return GENERIC_ERROR;
         }
+    }
+
+    public enum DomainAvailabilityErrorType {
+        INVALID_DOMAIN_NAME,
+        GENERIC_ERROR;
     }
 
     public enum UserRolesErrorType {
@@ -1024,6 +1071,12 @@ public class SiteStore extends Store {
             case FETCHED_PLANS:
                 handleFetchedPlans((FetchedPlansPayload) action.getPayload());
                 break;
+            case CHECK_DOMAIN_AVAILABILITY:
+                checkDomainAvailabilty((String) action.getPayload());
+                break;
+            case CHECKED_DOMAIN_AVAILABILITY:
+                handleCheckedDomainAvialability((DomainAvailabilityPayload) action.getPayload());
+                break;
             // Automated Transfer
             case CHECK_AUTOMATED_TRANSFER_ELIGIBILITY:
                 checkAutomatedTransferEligibility((SiteModel) action.getPayload());
@@ -1315,6 +1368,21 @@ public class SiteStore extends Store {
 
     private void handleFetchedPlans(FetchedPlansPayload payload) {
         emitChange(new OnPlansFetched(payload.site, payload.plans, payload.error));
+    }
+
+
+    private void checkDomainAvailabilty(String domainName) {
+        if (domainName == null || domainName.isEmpty()) {
+            DomainAvailabilityError error =
+                    new DomainAvailabilityError(DomainAvailabilityErrorType.INVALID_DOMAIN_NAME);
+            handleCheckedDomainAvialability(new DomainAvailabilityPayload(error));
+        } else {
+            mSiteRestClient.checkDomainAvailability(domainName);
+        }
+    }
+
+    private void handleCheckedDomainAvialability(DomainAvailabilityPayload payload) {
+        emitChange(new OnDomainAvailabilityChecked(payload.domainAvailabilityModel, payload.error));
     }
 
     // Automated Transfers
