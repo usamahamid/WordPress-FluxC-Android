@@ -13,6 +13,7 @@
 
 /me/
 /me/domain-contact-information/
+/me/domain-contact-information/validate
 /me/settings/
 /me/sites/
 /me/send-verification-email/
