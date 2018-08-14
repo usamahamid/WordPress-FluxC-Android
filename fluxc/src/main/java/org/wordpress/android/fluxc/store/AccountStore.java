@@ -30,9 +30,11 @@ import org.wordpress.android.fluxc.network.rest.wpcom.account.AccountRestClient.
 import org.wordpress.android.fluxc.network.rest.wpcom.account.AccountRestClient.AccountPushUsernameResponsePayload;
 import org.wordpress.android.fluxc.network.rest.wpcom.account.AccountRestClient.AccountRestPayload;
 import org.wordpress.android.fluxc.network.rest.wpcom.account.AccountRestClient.DomainContactPayload;
+import org.wordpress.android.fluxc.network.rest.wpcom.account.AccountRestClient.DomainContactValidationResponsePayload;
 import org.wordpress.android.fluxc.network.rest.wpcom.account.AccountRestClient.IsAvailable;
 import org.wordpress.android.fluxc.network.rest.wpcom.account.AccountRestClient.IsAvailableResponsePayload;
 import org.wordpress.android.fluxc.network.rest.wpcom.account.AccountRestClient.NewAccountResponsePayload;
+import org.wordpress.android.fluxc.network.rest.wpcom.account.DomainContactValidationResponse;
 import org.wordpress.android.fluxc.network.rest.wpcom.auth.AccessToken;
 import org.wordpress.android.fluxc.network.rest.wpcom.auth.Authenticator;
 import org.wordpress.android.fluxc.network.rest.wpcom.auth.Authenticator.AuthEmailResponsePayload;
@@ -262,6 +264,17 @@ public class AccountStore extends Store {
         NOTIFICATION_POST
     }
 
+    public static class DomainContactValidationPayload extends Payload<BaseNetworkError> {
+        public String domainName;
+        public DomainContactModel domainContactModel;
+
+        public DomainContactValidationPayload(String domainName,
+                                              DomainContactModel domainContactModel) {
+            this.domainName = domainName;
+            this.domainContactModel = domainContactModel;
+        }
+    }
+
     /**
      * Error for any of these methods:
      * {@link AccountRestClient#updateSubscriptionEmailComment(String,
@@ -369,6 +382,16 @@ public class AccountStore extends Store {
 
         public OnDomainContactFetched(@Nullable DomainContactModel contactModel, @Nullable DomainContactError error) {
             this.contactModel = contactModel;
+            this.error = error;
+        }
+    }
+
+    public static class OnDomainContactValidated extends OnChanged<DomainContactValidationError> {
+        @Nullable public DomainContactValidationResponse validationResponse;
+
+        public OnDomainContactValidated(@Nullable DomainContactValidationResponse validationResponse,
+                                        @Nullable DomainContactValidationError error) {
+            this.validationResponse = validationResponse;
             this.error = error;
         }
     }
@@ -641,6 +664,26 @@ public class AccountStore extends Store {
         GENERIC_ERROR;
     }
 
+    public static class DomainContactValidationError implements OnChangedError {
+        @NonNull public DomainContactValidationErrorType type;
+        @Nullable public String message;
+
+        public DomainContactValidationError(@NonNull DomainContactValidationErrorType type, @Nullable String message) {
+            this.type = type;
+            this.message = message;
+        }
+
+        public DomainContactValidationError(@NonNull DomainContactValidationErrorType type) {
+            this.type = type;
+            this.message = message;
+        }
+    }
+
+    public enum DomainContactValidationErrorType {
+        INVALID_DOMAIN_NAME,
+        GENERIC_ERROR;
+    }
+
     public static class AuthEmailError implements OnChangedError {
         public AuthEmailErrorType type;
         public String message;
@@ -861,6 +904,12 @@ public class AccountStore extends Store {
                 break;
             case FETCHED_DOMAIN_CONTACT:
                 handleFetchedDomainContact((DomainContactPayload) payload);
+                break;
+            case VALIDATE_DOMAIN_CONTACT:
+                validateDomainContact((DomainContactValidationPayload) payload);
+                break;
+            case VALIDATED_DOMAIN_CONTACT:
+                handleValidatedDomainContact((DomainContactValidationResponsePayload) payload);
                 break;
         }
     }
@@ -1234,4 +1283,21 @@ public class AccountStore extends Store {
     private void handleFetchedDomainContact(DomainContactPayload payload) {
         emitChange(new OnDomainContactFetched(payload.contactModel, payload.error));
     }
+
+    private void validateDomainContact(DomainContactValidationPayload payload) {
+        if (TextUtils.isEmpty(payload.domainName)) {
+            DomainContactValidationError error =
+                    new DomainContactValidationError(DomainContactValidationErrorType.INVALID_DOMAIN_NAME);
+            DomainContactValidationResponsePayload responsePayload =
+                    new DomainContactValidationResponsePayload(error);
+            handleValidatedDomainContact(responsePayload);
+        } else {
+            // TODO Add Rest Client invocation.
+        }
+    }
+
+    private void handleValidatedDomainContact(DomainContactValidationResponsePayload payload) {
+        emitChange(new OnDomainContactValidated(payload.validationResponse, payload.error));
+    }
+
 }

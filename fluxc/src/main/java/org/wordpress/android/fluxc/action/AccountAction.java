@@ -12,6 +12,7 @@ import org.wordpress.android.fluxc.network.rest.wpcom.account.AccountRestClient.
 import org.wordpress.android.fluxc.network.rest.wpcom.account.AccountRestClient.AccountPushUsernameResponsePayload;
 import org.wordpress.android.fluxc.network.rest.wpcom.account.AccountRestClient.AccountRestPayload;
 import org.wordpress.android.fluxc.network.rest.wpcom.account.AccountRestClient.DomainContactPayload;
+import org.wordpress.android.fluxc.network.rest.wpcom.account.AccountRestClient.DomainContactValidationResponsePayload;
 import org.wordpress.android.fluxc.network.rest.wpcom.account.AccountRestClient.IsAvailableResponsePayload;
 import org.wordpress.android.fluxc.network.rest.wpcom.account.AccountRestClient.NewAccountResponsePayload;
 import org.wordpress.android.fluxc.store.AccountStore.AddOrDeleteSubscriptionPayload;
@@ -25,6 +26,7 @@ import org.wordpress.android.fluxc.store.AccountStore.PushUsernamePayload;
 import org.wordpress.android.fluxc.store.AccountStore.SubscriptionResponsePayload;
 import org.wordpress.android.fluxc.store.AccountStore.UpdateSubscriptionPayload;
 import org.wordpress.android.fluxc.store.AccountStore.UpdateTokenPayload;
+import org.wordpress.android.fluxc.store.AccountStore.DomainContactValidationPayload;
 
 @ActionEnum
 public enum AccountAction implements IAction {
@@ -73,6 +75,8 @@ public enum AccountAction implements IAction {
     UPDATE_SUBSCRIPTION_NOTIFICATION_POST,
     @Action
     FETCH_DOMAIN_CONTACT,
+    @Action(payloadType = DomainContactValidationPayload.class)
+    VALIDATE_DOMAIN_CONTACT,
 
     // Remote responses
     @Action(payloadType = AccountRestPayload.class)
@@ -99,6 +103,8 @@ public enum AccountAction implements IAction {
     UPDATED_SUBSCRIPTION,
     @Action(payloadType = DomainContactPayload.class)
     FETCHED_DOMAIN_CONTACT,
+    @Action(payloadType = DomainContactValidationResponsePayload.class)
+    VALIDATED_DOMAIN_CONTACT,
 
     // Local actions
     @Action(payloadType = AccountModel.class)
